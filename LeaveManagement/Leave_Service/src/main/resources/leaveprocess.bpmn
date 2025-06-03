@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+                  xmlns:modeler="http://camunda.org/schema/modeler/1.0"
+                  id="Definitions_LeaveRequest"
+                  targetNamespace="http://bpmn.io/schema/bpmn"
+                  exporter="Camunda Modeler"
+                  exporterVersion="4.8.1">
+
+
+    <bpmn:process id="leaveprocess" name="Leave Approval Process" isExecutable="true">
+
+
+        <bpmn:startEvent id="StartEvent_RequestLeave" name="Request Leave">
+            <bpmn:extensionElements>
+                <camunda:formData>
+                    <camunda:formField id="employeeName" label="Employee Name" type="string"/>
+                    <camunda:formField id="leaveType" label="Leave Type" type="string"/>
+                    <camunda:formField id="numberOfDays" label="Number of Days" type="long"/>
+                </camunda:formData>
+            </bpmn:extensionElements>
+            <bpmn:outgoing>Flow_RequestToReview</bpmn:outgoing>
+        </bpmn:startEvent>
+
+
+        <bpmn:userTask id="UserTask_ReviewLeave" name="Review Leave Request">
+            <bpmn:incoming>Flow_RequestToReview</bpmn:incoming>
+            <bpmn:outgoing>Flow_ReviewToDecision</bpmn:outgoing>
+        </bpmn:userTask>
+
+
+        <bpmn:exclusiveGateway id="Gateway_ApprovalDecision" name="Is status == 'Accepted'?">
+            <bpmn:incoming>Flow_ReviewToDecision</bpmn:incoming>
+            <bpmn:outgoing>Flow_Approved</bpmn:outgoing>
+            <bpmn:outgoing>Flow_Rejected</bpmn:outgoing>
+        </bpmn:exclusiveGateway>
+
+
+        <bpmn:endEvent id="EndEvent_LeaveApproved" name="Leave Approved">
+            <bpmn:incoming>Flow_Approved</bpmn:incoming>
+        </bpmn:endEvent>
+
+
+        <bpmn:endEvent id="EndEvent_LeaveRejected" name="Leave Rejected">
+            <bpmn:incoming>Flow_Rejected</bpmn:incoming>
+        </bpmn:endEvent>
+
+
+        <!-- Sequence Flows -->
+        <bpmn:sequenceFlow id="Flow_RequestToReview" sourceRef="StartEvent_RequestLeave" targetRef="UserTask_ReviewLeave"/>
+        <bpmn:sequenceFlow id="Flow_ReviewToDecision" sourceRef="UserTask_ReviewLeave" targetRef="Gateway_ApprovalDecision"/>
+        <bpmn:sequenceFlow id="Flow_Approved" sourceRef="Gateway_ApprovalDecision" targetRef="EndEvent_LeaveApproved" name="Yes">
+            <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${status == 'Accepted'}</bpmn:conditionExpression>
+        </bpmn:sequenceFlow>
+
+
+        <bpmn:sequenceFlow id="Flow_Rejected" sourceRef="Gateway_ApprovalDecision" targetRef="EndEvent_LeaveRejected" name="No">
+            <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${status == 'Rejected'}</bpmn:conditionExpression>
+        </bpmn:sequenceFlow>
+
+
+
+
+    </bpmn:process>
+
+
+    <bpmndi:BPMNDiagram id="BPMNDiagram_LeaveApproval">
+        <bpmndi:BPMNPlane id="BPMNPlane_LeaveApproval" bpmnElement="leaveApprovalProcess">
+
+
+            <!-- Shapes -->
+            <bpmndi:BPMNShape id="Shape_StartEvent_RequestLeave" bpmnElement="StartEvent_RequestLeave">
+                <dc:Bounds x="100" y="120" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+
+
+            <bpmndi:BPMNShape id="Shape_UserTask_ReviewLeave" bpmnElement="UserTask_ReviewLeave">
+                <dc:Bounds x="180" y="100" width="120" height="80"/>
+            </bpmndi:BPMNShape>
+
+
+            <bpmndi:BPMNShape id="Shape_Gateway_ApprovalDecision" bpmnElement="Gateway_ApprovalDecision" isMarkerVisible="true">
+                <dc:Bounds x="340" y="115" width="50" height="50"/>
+            </bpmndi:BPMNShape>
+
+
+            <bpmndi:BPMNShape id="Shape_EndEvent_LeaveApproved" bpmnElement="EndEvent_LeaveApproved">
+                <dc:Bounds x="450" y="80" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+
+
+            <bpmndi:BPMNShape id="Shape_EndEvent_LeaveRejected" bpmnElement="EndEvent_LeaveRejected">
+                <dc:Bounds x="450" y="170" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+
+
+            <!-- Edges -->
+            <bpmndi:BPMNEdge id="Edge_RequestToReview" bpmnElement="Flow_RequestToReview">
+                <di:waypoint x="136" y="138" />
+                <di:waypoint x="180" y="138" />
+            </bpmndi:BPMNEdge>
+
+
+            <bpmndi:BPMNEdge id="Edge_ReviewToDecision" bpmnElement="Flow_ReviewToDecision">
+                <di:waypoint x="300" y="138" />
+                <di:waypoint x="340" y="138" />
+            </bpmndi:BPMNEdge>
+
+
+            <bpmndi:BPMNEdge id="Edge_Approved" bpmnElement="Flow_Approved">
+                <di:waypoint x="390" y="138" />
+                <di:waypoint x="450" y="98" />
+            </bpmndi:BPMNEdge>
+
+
+            <bpmndi:BPMNEdge id="Edge_Rejected" bpmnElement="Flow_Rejected">
+                <di:waypoint x="390" y="138" />
+                <di:waypoint x="450" y="188" />
+            </bpmndi:BPMNEdge>
+
+
+        </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+</bpmn:definitions>
+
+
